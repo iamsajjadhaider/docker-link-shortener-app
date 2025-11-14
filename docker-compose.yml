@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # --- 1. Database Service (Data Tier) ---
+  db:
+    image: mysql:8.0
+    container_name: link_shortener_db
+    # Load credentials from the .env file
+    env_file:
+      - .env
+    volumes:
+      # Persistent volume for MySQL data
+      - db_data:/var/lib/mysql
+      # Script to initialize the database and table
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: always
+    # Recommended DNS for stable image pulls and external connections
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+  # --- 2. Application Service (Web/Presentation Tier) ---
+  app:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    container_name: link_shortener_app
+    # Load credentials from the .env file
+    env_file:
+      - .env
+    ports:
+      # Map host port 8080 to container port 80 (where Apache runs)
+      - "8080:80"
+    volumes:
+      # Mount the local web directory for live development
+      - ./web:/var/www/html
+    depends_on:
+      - db
+    restart: always
+    # Recommended DNS for stable operation
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+volumes:
+  # Named volume for persistent database storage
+  db_data:

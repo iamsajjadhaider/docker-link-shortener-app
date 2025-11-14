@@ -1,0 +1,12 @@
+# Turn on the Rewrite Engine
+RewriteEngine On
+
+# If the request is for an actual file (like index.php, style.css, etc.), skip the rewrite rules
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# If the request is for an actual directory (like /images/), skip the rewrite rules
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# If the request makes it this far, it means it's a short code (e.g., /abc12).
+# Send ALL such requests to index.php, passing the path as part of the URL.
+RewriteRule ^(.*)$ index.php [L]
